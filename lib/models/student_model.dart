@@ -1,4 +1,5 @@
 class StudentModel {
+   final String id;
   final Map<String, dynamic> user;
   final String phone;
   final Map<String, dynamic> faculty;
@@ -9,6 +10,7 @@ class StudentModel {
   final String emergencyPhone;
 
   StudentModel({
+    required this.id,
     required this.user,
     required this.phone,
     required this.faculty,
@@ -21,6 +23,7 @@ class StudentModel {
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
     return StudentModel(
+      id: json['_id'],
       user: json['user'],
       phone: json['phone'],
       faculty: json['faculty'],

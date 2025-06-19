@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qrcode/models/schedule_model.dart';
-import 'package:qrcode/services/schedule_service.dart';
+import 'package:reexam/models/schedule_model.dart';
+import 'package:reexam/services/schedule_service.dart';
 
 class ScheduleProvider with ChangeNotifier {
   List<ScheduleModel> _schedules = [];

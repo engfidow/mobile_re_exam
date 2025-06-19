@@ -1,5 +1,5 @@
-import 'package:qrcode/providers/user_provider.dart';
-import 'package:qrcode/screens/forgetpassword/forget_password_screen.dart';
+import 'package:reexam/providers/user_provider.dart';
+import 'package:reexam/screens/forgetpassword/forget_password_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 

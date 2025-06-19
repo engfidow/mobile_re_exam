@@ -63,7 +63,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
 
     final response = await http.post(
       Uri.parse(
-          'http://192.168.8.26:5000/api/users/verify-code-update-password'),
+          'https://re-exam.onrender.com/api/users/verify-code-update-password'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(
           {'email': widget.email, 'verificationCode': code, 'newPassword': ''}),
@@ -96,7 +96,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     try {
       final response = await http.post(
         Uri.parse(
-            'http://192.168.8.26:5000/api/users/send-verification-code'),
+            'https://re-exam.onrender.com/api/users/send-verification-code'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': widget.email}),
       );

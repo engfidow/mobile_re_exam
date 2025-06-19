@@ -1,11 +1,12 @@
-import 'package:qrcode/dashboard.dart';
-import 'package:qrcode/providers/attendance_provider.dart';
+import 'package:reexam/dashboard.dart';
 
-import 'package:qrcode/providers/schedule_provider.dart';
-import 'package:qrcode/providers/student_provider.dart';
+import 'package:reexam/providers/re_exam_provider.dart';
 
-import 'package:qrcode/providers/user_provider.dart';
-import 'package:qrcode/screens/Sigin_screen.dart';
+import 'package:reexam/providers/schedule_provider.dart';
+import 'package:reexam/providers/student_provider.dart';
+
+import 'package:reexam/providers/user_provider.dart';
+import 'package:reexam/screens/Sigin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => StudentProvider()),
         ChangeNotifierProvider(create: (_) => ScheduleProvider()),
-        ChangeNotifierProvider(create: (_) => AttendanceProvider()), 
+    
+        ChangeNotifierProvider(create: (_) => ReExamProvider()), 
       ],
       child: MyApp(),
     ),

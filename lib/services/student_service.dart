@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:qrcode/models/student_model.dart';
+import 'package:reexam/models/student_model.dart';
 import 'package:http/http.dart' as http;
 
 class StudentService {
-  final String baseUrl = 'http://192.168.8.26:5000/api/students';
+  final String baseUrl = 'https://re-exam.onrender.com/api/students';
 
   Future<StudentModel?> getStudentByUserId(String userId) async {
   final response = await http.get(Uri.parse('$baseUrl'));

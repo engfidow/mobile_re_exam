@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:qrcode/models/user_model.dart';
-import 'package:qrcode/providers/user_provider.dart';
+import 'package:reexam/models/user_model.dart';
+import 'package:reexam/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import 'package:photo_view/photo_view.dart';
@@ -160,7 +160,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                           Consumer<UserProvider>(
                             builder: (context, userProvider, child) {
                               var kEndpoint =
-                                  "http://192.168.8.26:5000/";
+                                  "https://re-exam.onrender.com/";
                               String imageUrl = Uri.tryParse(kEndpoint +
                                               (userProvider.user?.image ?? ''))
                                           ?.isAbsolute ==

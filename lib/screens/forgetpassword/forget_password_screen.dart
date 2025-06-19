@@ -24,7 +24,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     try {
       final response = await http.post(
         Uri.parse(
-            'http://192.168.8.26:5000/api/users/send-verification-code'),
+            'https://re-exam.onrender.com/api/users/send-verification-code'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email}),
       );

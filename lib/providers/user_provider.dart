@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:qrcode/models/user_model.dart';
-import 'package:qrcode/services/userService.dart';
-import 'package:qrcode/utils/constants.dart';
+import 'package:reexam/models/user_model.dart';
+import 'package:reexam/services/userService.dart';
+import 'package:reexam/utils/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
 

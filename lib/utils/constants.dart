@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 const kPrimaryColor = Color(0xffc1121f);
 const kSecondaryColor = Color(0xffebc4749);
-const kEndpoint = "http://192.168.8.26:5000/api";
+const kEndpoint = "https://re-exam.onrender.com/api";
 const kPadding = 16.0;
 const kUserInfo = "user_info";
 

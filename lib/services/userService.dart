@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:qrcode/models/user_model.dart';
-import 'package:qrcode/utils/constants.dart';
+import 'package:reexam/models/user_model.dart';
+import 'package:reexam/utils/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
@@ -40,11 +40,14 @@ class UserService {
   }
 
   Future<User?> login(String email, String password) async {
+    print(email);
     var response = await http.post(
       Uri.parse('$baseUrl/users/login'),
       headers: {"Content-Type": "application/json"},
       body: json.encode({'email': email, 'password': password}),
     );
+
+    print(response.statusCode);
 
     if (response.statusCode == 200) {
       var userData = json.decode(response.body);

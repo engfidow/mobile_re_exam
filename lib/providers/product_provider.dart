@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qrcode/models/product.dart';
+import 'package:reexam/models/product.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -15,7 +15,7 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
 
     final url =
-        Uri.parse('http://192.168.8.26:5000/api/products/info/uids');
+        Uri.parse('https://re-exam.onrender.com/api/products/info/uids');
 
     try {
       final response = await http.get(

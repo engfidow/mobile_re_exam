@@ -23,7 +23,7 @@ class _ScanScreenState extends State<ScanScreen> {
   bool locationLoading = true;
   bool studentLoading = true;
 
-  static const String baseUrl = 'http://192.168.8.26:5000/api/attendance';
+  static const String baseUrl = 'https://re-exam.onrender.com/api/attendance';
   String? studentId;
 
   @override

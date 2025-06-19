@@ -1,15 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iconly/iconly.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:pie_chart/pie_chart.dart';
-import '../providers/user_provider.dart';
-import '../providers/attendance_provider.dart';
-import '../models/attendance_model.dart';
+import 'package:reexam/models/re_exam_model.dart';
+import 'package:reexam/providers/re_exam_provider.dart';
+import 'package:reexam/providers/student_provider.dart';
+import 'package:reexam/providers/user_provider.dart';
+import 'package:reexam/screens/re_exam_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,15 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    loadAttendance();
+    loadReExams();
   }
 
-  Future<void> loadAttendance() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final studentId = userProvider.user?.id ?? '';
-
-    await Provider.of<AttendanceProvider>(context, listen: false)
-        .fetchAttendance(studentId);
+  Future<void> loadReExams() async {
+    final userId = Provider.of<UserProvider>(context, listen: false).user?.id;
+    if (userId != null) {
+      await Provider.of<StudentProvider>(context, listen: false).fetchStudent(userId);
+      final student = Provider.of<StudentProvider>(context, listen: false).student;
+      if (student != null) {
+        await Provider.of<ReExamProvider>(context, listen: false)
+            .fetchReExamsByStudentId(student.id);
+      }
+    }
     if (mounted) setState(() => loading = false);
   }
 
@@ -51,8 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.black,
           body: Center(
             child: PhotoView(
-              imageProvider: CachedNetworkImageProvider(
-                  'http://192.168.8.26:5000/$imageUrl'),
+              imageProvider: CachedNetworkImageProvider('https://re-exam.onrender.com/$imageUrl'),
               backgroundDecoration: const BoxDecoration(color: Colors.black),
             ),
           ),
@@ -61,32 +64,49 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void showReceiptModal(BuildContext context, ReExamModel exam) {
+    final dateStr = DateFormat('MMM dd, yyyy – hh:mm a').format(exam.createdAt);
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.info,
+      animType: AnimType.rightSlide,
+      headerAnimationLoop: false,
+      title: 'Re-Exam Receipt',
+      desc: '',
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildReceiptRow("Phone", exam.phone),
+            buildReceiptRow("Reason", exam.reason),
+            buildReceiptRow("Subjects", exam.subjects.join(', ')),
+            buildReceiptRow("Status", exam.status.toUpperCase()),
+            buildReceiptRow("Total Fee", "\$${exam.totalFee.toStringAsFixed(2)}"),
+            buildReceiptRow("Date", dateStr),
+          ],
+        ),
+      ),
+      btnOkOnPress: () {},
+    ).show();
+  }
+
+  Widget buildReceiptRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final attendance = Provider.of<AttendanceProvider>(context).records;
-
-    int total = attendance.length;
-    int present = attendance.where((e) => e.status == 'present').length;
-    int absent = total - present;
-    double presentRate = total > 0 ? (present / total * 100) : 0;
-
-    Map<String, int> subjectAbsence = {};
-    for (var record in attendance) {
-      if (record.status == 'absent') {
-        subjectAbsence[record.subjectName] =
-            (subjectAbsence[record.subjectName] ?? 0) + 1;
-      }
-    }
-
-    String? warningMsg;
-    subjectAbsence.forEach((subject, count) {
-      if (count == 4) {
-        warningMsg = '⚠ You have 4 absences in $subject';
-      } else if (count >= 5) {
-        warningMsg = '❌ You are blocked from exam in $subject';
-      }
-    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
@@ -98,20 +118,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     buildHeader(userProvider),
-                    if (warningMsg != null) buildWarningBox(warningMsg!),
-                    const SizedBox(height: 15),
-                    buildPieChart(present, absent),
-                    const SizedBox(height: 15),
-                    buildStats(total, present, absent, presentRate),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: const Text("Recent Attendance",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Latest Re-Exams",
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const ReExamRegisterScreen()),
+                              );
+                            },
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            label: const Text("Register", style: TextStyle(color: Colors.white),),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 10),
-                    buildAttendanceList(attendance),
+                    buildReExamList(),
                   ],
                 ),
               ),
@@ -139,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "Hello,${userProvider.user?.name ?? 'Guest'}\n${getGreetingMessage()}",
+            "Hello, ${userProvider.user?.name ?? 'Guest'}\n${getGreetingMessage()}",
             style: GoogleFonts.poppins(
               textStyle: const TextStyle(
                 fontWeight: FontWeight.w600,
@@ -149,12 +182,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           GestureDetector(
-            onTap: () =>
-                _showProfilePhoto(context, userProvider.user?.image ?? ""),
+            onTap: () => _showProfilePhoto(context, userProvider.user?.image ?? ""),
             child: CircleAvatar(
               radius: 40,
               backgroundImage: CachedNetworkImageProvider(
-                'http://192.168.8.26:5000/${userProvider.user?.image ?? ""}',
+                'https://re-exam.onrender.com/${userProvider.user?.image ?? ""}',
               ),
             ),
           ),
@@ -163,125 +195,53 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildWarningBox(String warningMsg) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: warningMsg.contains('❌') ? Colors.red[100] : Colors.yellow[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            warningMsg.contains('❌') ? Icons.block : Icons.warning,
-            color: warningMsg.contains('❌') ? Colors.red : Colors.orange,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(warningMsg, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget buildReExamList() {
+    final reExams = Provider.of<ReExamProvider>(context).reExams;
 
-  Widget buildPieChart(int present, int absent) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: PieChart(
-        dataMap: {
-          "Present": present.toDouble(),
-          "Absent": absent.toDouble(),
-        },
-        chartRadius: MediaQuery.of(context).size.width / 2.0,
-        colorList: const [Colors.green, Colors.red],
-        chartValuesOptions: const ChartValuesOptions(showChartValuesInPercentage: true),
-      ),
-    );
-  }
+    if (reExams.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        child: Center(child: Text("No re-exams registered yet.")),
+      );
+    }
 
-  Widget buildStats(int total, int present, int absent, double presentRate) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 20),
-    padding: const EdgeInsets.all(15),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
-    ),
-    child: Column(
-      children: [
-        buildStatRow("Total Periods", total.toString(), IconlyBold.document),
-        buildStatRow("Present Periods", present.toString(), IconlyBold.show),
-        buildStatRow("Absent Periods", absent.toString(), IconlyBold.hide),
-        buildStatRow("Present Rate", "${presentRate.toStringAsFixed(1)}%", IconlyBold.graph),
-      ],
-    ),
-  );
-}
+    final latest = reExams.take(10).toList();
 
-
-  Widget buildStatRow(String title, String value, IconData icon) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFDC143C).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: const Color(0xFFDC143C), size: 20),
-            ),
-            const SizedBox(width: 10),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-          ],
-        ),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
-    ),
-  );
-}
-
-  Widget buildAttendanceList(List<AttendanceModel> attendance) {
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: attendance.length < 6 ? attendance.length : 6,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: latest.length,
       itemBuilder: (context, index) {
-        final record = attendance[index];
-        final dateStr = DateFormat('MMM dd, yyyy').format(record.date);
-        final isPresent = record.status == 'present';
-
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              left: BorderSide(
-                  color: isPresent ? Colors.green : Colors.red, width: 5),
-            ),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [
-              BoxShadow(color: Colors.black12, blurRadius: 5),
-            ],
-          ),
-          child: ListTile(
-            title: Text('${record.subjectName} - ${record.className}'),
-            subtitle: Text('${record.day}, $dateStr\nTime: ${record.timeScanned ?? "-"}'),
-            trailing: Text(
-              isPresent ? "Present" : "Absent",
-              style: TextStyle(
-                color: isPresent ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
+        final exam = latest[index];
+        return GestureDetector(
+          onTap: () => showReceiptModal(context, exam),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border(
+                left: BorderSide(
+                    width: 5,
+                    color: exam.status == 'approved'
+                        ? Colors.green
+                        : exam.status == 'rejected'
+                            ? Colors.red
+                            : Colors.orange),
               ),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Subjects: ${exam.subjects.join(', ')}",
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text("Reason: ${exam.reason}"),
+                Text("Status: ${exam.status.toUpperCase()}"),
+                Text("Total Fee: \$${exam.totalFee.toStringAsFixed(2)}"),
+              ],
             ),
           ),
         );
@@ -289,22 +249,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Beautiful shimmer loader:
   Widget buildShimmerUI() {
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: 6,
       itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            height: 140,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          height: 120,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(12),
           ),
         );
       },

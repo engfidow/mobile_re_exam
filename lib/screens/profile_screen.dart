@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:qrcode/screens/Sigin_screen.dart';
+import 'package:reexam/screens/Sigin_screen.dart';
 import '../providers/user_provider.dart';
 import '../providers/student_provider.dart';
 
@@ -76,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         CircleAvatar(
                           radius: 50,
                           backgroundImage: NetworkImage(
-                            'http://192.168.8.26:5000/${user.image}',
+                            'https://re-exam.onrender.com/${user.image}',
                           ),
                         ),
                         const SizedBox(height: 12),

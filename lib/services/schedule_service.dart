@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/schedule_model.dart';
 
 class ScheduleService {
-  final String baseUrl = 'http://192.168.8.26:5000/api/schedules';
+  final String baseUrl = 'https://re-exam.onrender.com/api/schedules';
 
   Future<List<ScheduleModel>> getSchedulesByClassId(String classId) async {
     print("object");

@@ -1,5 +1,5 @@
-import 'package:qrcode/dashboard.dart';
-import 'package:qrcode/providers/user_provider.dart';
+import 'package:reexam/dashboard.dart';
+import 'package:reexam/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
